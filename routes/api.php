@@ -15,6 +15,8 @@ Route::get('interest-type', [InterestTypeController::class, 'index']);
 
 // relationship
 Route::get('relationship-type', [RelationshipTypeController::class, 'getRelationships']);
+Route::get('relationship-type/user/{id}', [RelationshipTypeController::class, 'getRelationshipByUser'])->name('getRelationshipUser');
+Route::post('relationship-type/user', [RelationshipTypeController::class, 'storeUserRelationship']);
 
 // connect
 Route::get('users-connect/{id}', [MatchController::class, 'getUserToConnect']);
