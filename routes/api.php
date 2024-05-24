@@ -3,12 +3,23 @@
 use App\Http\Controllers\Api\InterestTypeController;
 use App\Http\Controllers\Api\MatchController;
 use App\Http\Controllers\Api\RelationshipTypeController;
+use App\Http\Controllers\Api\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');      
+
+// authen
+Route::post('register', [AuthController::class, 'register']);
+Route::post('login', [AuthController::class, 'login']);
+
+// protect route
+Route::middleware('auth.api')->group(function () {
+    Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('user', [AuthController::class, 'user'])->name('getUser');
+});
 
 // interest
 Route::get('interest-type', [InterestTypeController::class, 'index']);
