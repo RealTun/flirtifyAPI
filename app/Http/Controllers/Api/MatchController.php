@@ -5,12 +5,18 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use App\Models\User;
 
 class MatchController extends Controller
 {
     //
     public function getUserToConnect(int $id)
     {
+        if ($id != auth('sanctum')->user()->id) {
+            return response()->json(['message' => 'Not allowed'], 403);
+        }
+
         $users = DB::table('user_account')
             ->whereRaw('gender = (SELECT looking_for FROM user_account WHERE id = ?)', [$id])
             ->whereRaw('looking_for = (SELECT gender FROM user_account WHERE id = ?)', [$id])
@@ -26,6 +32,9 @@ class MatchController extends Controller
 
     public function getMatchersByUser(int $id)
     {
+        if ($id != auth('sanctum')->user()->id) {
+            return response()->json(['message' => 'Not allowed'], 403);
+        }
         // collection user2_id by user1_id
         $user2_id = DB::table('user_connection')
             ->whereNotNull('match_date')
@@ -42,57 +51,64 @@ class MatchController extends Controller
     public function storeUserLike(Request $request)
     {
         $rules = [
-            'user1_id' => 'required',
+            // 'user1_id' => 'required',
             'user2_id' => 'required',
         ];
 
-        if ($request->validate($rules)) {
-            $user1_id = $request->user1_id;
-            $user2_id = $request->user2_id;
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => "user2_id cannot be left blank!"
+            ], 400);
+        }
+        
+        $user1_id = $request->user('sanctum')->id;
+        $user2_id = $request->user2_id;
+        if(!User::find($user2_id)){
+            return response()->json(['message' => 'Cannot find this user!'], 400);
+        }
+        else if($user1_id == $user2_id){
+            return response()->json(['message' => 'Cannot like yourself!'], 400);
+        }
 
-            DB::table("user_connection")->insert([
-                'user1_id' => $user1_id,
-                'user2_id' => $user2_id
-            ]);
-            // check 2 user is matched
-            $isMatched = DB::table('user_connection')
+        DB::table("user_connection")->insert([
+            'user1_id' => $user1_id,
+            'user2_id' => $user2_id
+        ]);
+        // check 2 user is matched
+        $isMatched = DB::table('user_connection')
+            ->where('user1_id', $user2_id)
+            ->where('user2_id', $user1_id)
+            ->exists();
+        if ($isMatched) {
+            $currentTime = date('Y-m-d H:i:s');
+            // update column match_date in user_connection, mark it is matched
+            DB::table('user_connection')
+                ->where('user1_id', $user1_id)
+                ->where('user2_id', $user2_id)
+                ->update([
+                    'match_date' => $currentTime
+                ]);
+            ////
+            DB::table('user_connection')
                 ->where('user1_id', $user2_id)
                 ->where('user2_id', $user1_id)
-                ->exists();
-            if ($isMatched) {
-                $currentTime = date('Y-m-d H:i:s');
-                // update column match_date in user_connection, mark it is matched
-                DB::table('user_connection')
-                    ->where('user1_id', $user1_id)
-                    ->where('user2_id', $user2_id)
-                    ->update([
-                        'match_date' => $currentTime
-                    ]);
-                ////
-                DB::table('user_connection')
-                    ->where('user1_id', $user2_id)
-                    ->where('user2_id', $user1_id)
-                    ->update([
-                        'match_date' => $currentTime
-                    ]);
-                // response
-                return response()->json([
-                    'response' => "success",
-                    'user1' => $user1_id,
-                    'user2' => $user2_id,
-                    'message' => "user1 matched to user2"
-                ], 200);
-            }
-
+                ->update([
+                    'match_date' => $currentTime
+                ]);
+            // response
             return response()->json([
-                'response' => "success",
-                'message' => "Wating user2 like user1"
-            ], 201);
+                'status' => "success",
+                // 'user1' => $user1_id,
+                // 'user2' => $user2_id,
+                'message' => "You matched to user2!"
+            ], 200);
         }
 
         return response()->json([
-            'response' => 'error',
-            'message' => "user1_id and user2_id cannot be left blank!"
-        ], 400);
+            'status' => "success",
+            'message' => "Wating user2 like you!"
+        ], 201);
     }
 }
