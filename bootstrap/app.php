@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AuthenticateApi;
+use App\Http\Middleware\CheckTokenExpiration;
 use Laravel\Sanctum\Http\Middleware\CheckAbilities;
 use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
 use Illuminate\Auth\AuthenticationException;
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //
         $middleware->alias([
             'auth.api' => AuthenticateApi::class,
+            'check.token.expiration' => CheckTokenExpiration::class,
             'abilities' => CheckAbilities::class,
             'ability' => CheckForAnyAbility::class,
         ]);

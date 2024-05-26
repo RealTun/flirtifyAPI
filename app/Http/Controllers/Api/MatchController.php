@@ -65,11 +65,27 @@ class MatchController extends Controller
         
         $user1_id = $request->user('sanctum')->id;
         $user2_id = $request->user2_id;
+        $isExisted = DB::table("user_connection")->where([
+            'user1_id' => $user1_id,
+            'user2_id' => $user2_id
+        ])->exists();
         if(!User::find($user2_id)){
-            return response()->json(['message' => 'Cannot find this user!'], 400);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Cannot find this user!'
+            ], 400);
         }
         else if($user1_id == $user2_id){
-            return response()->json(['message' => 'Cannot like yourself!'], 400);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Cannot like yourself!'
+            ], 400);
+        }
+        else if($isExisted){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'You have liked this person before!'
+            ], 400);
         }
 
         DB::table("user_connection")->insert([

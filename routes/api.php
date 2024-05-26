@@ -16,7 +16,7 @@ Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
 // protect route
-Route::middleware('auth.api')->group(function () {
+Route::middleware(['auth.api', 'check.token.expiration'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('user', [AuthController::class, 'user'])->name('getUser');
 
