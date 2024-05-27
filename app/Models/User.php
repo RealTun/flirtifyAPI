@@ -30,4 +30,33 @@ class User extends Authenticatable
     protected $hidden = [
         'pw',
     ];
+    
+    public function photos()
+    {
+        return $this->hasMany(UserPhoto::class, 'user_account_id');
+    }
+
+    // Define the relationship with the UserConnection model as user1
+    public function connectionsAsUser1()
+    {
+        return $this->hasMany(UserConnection::class, 'user1_id');
+    }
+
+    // Define the relationship with the UserConnection model as user2
+    public function connectionsAsUser2()
+    {
+        return $this->hasMany(UserConnection::class, 'user2_id');
+    }
+
+    // Define the relationship with the Message model as the sender
+    public function sentMessages()
+    {
+        return $this->hasMany(Message::class, 'sender_id');
+    }
+
+    // Define the relationship with the Message model as the receiver
+    public function receivedMessages()
+    {
+        return $this->hasMany(Message::class, 'receiver_id');
+    }
 }

@@ -29,6 +29,7 @@ class RelationshipTypeController extends Controller
             ->pluck('relationship_type.name_relationship');
         if(count($data) < 1){
             return response()->json([
+                'status' => 'error',
                 'message' => "This user has not established a relationship"
             ], 400);
         }

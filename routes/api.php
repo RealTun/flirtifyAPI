@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\InterestTypeController;
 use App\Http\Controllers\Api\MatchController;
 use App\Http\Controllers\Api\RelationshipTypeController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\PhotoController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -38,6 +39,10 @@ Route::middleware(['auth.api', 'check.token.expiration'])->group(function () {
     // matcher
     Route::get('matchers/{id}', [MatchController::class, 'getMatchersByUser']);
     Route::post('matchers', [MatchController::class, 'storeUserLike']);
+
+    // photo
+    Route::get('user-photos/{id}', [PhotoController::class,'getUserPhotos']);
+    Route::post('user-photos/upload', [PhotoController::class,'storeUserPhotos']);
 });
 
 // interest
