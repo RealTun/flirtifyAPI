@@ -13,26 +13,25 @@ class InterestTypeController extends Controller
     //
     public function index(){
         $interests = DB::table('interest_type')->get();
-        return response()->json($interests, 201);
+        return response()->json($interests, 200);
     }
 
-    public function getInterestByUser(int $id){
-        if ($id != auth('sanctum')->user()->id) {
-            return response()->json(['message' => 'Not allowed'], 403);
-        }
+    public function getInterestByUser(){
+        $user = auth('sanctum')->user();
         $data = DB::table('interest_user')
             ->join('user_account', 'user_account_id', 'user_account.id')
             ->join('interest_type', 'interest_type_id', 'interest_type.id')
-            ->where('user_account.id', $id)
+            ->where('user_account.id', $user->id)
             ->pluck('interest_type.name_interest_type');
         if(count($data) < 1){
             return response()->json([
+                'status' => 'error',
                 'message' => "This user has not established a interest"
             ], 400);
         }
         return response()->json([
             'status' => 'success',
-            'user_name' => auth('sanctum')->user()->fullname,
+            'user_name' => $user->fullname,
             'name_interest' => $data
         ], 200);
     }
@@ -74,7 +73,7 @@ class InterestTypeController extends Controller
             'user_account_id' => $user_id,
             'interest_type_id' => $interest_type_id
         ]);
-        return redirect()->route('getInterestUser', ['id' => $user_id]);
+        return redirect()->route('getInterestUser');
     }
 
     public function deleteUserInterest(int $interest_type_id){

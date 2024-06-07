@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\User;
+use App\Models\UserPhoto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -88,6 +89,21 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         $user = $request->user('sanctum');
-        return response()->json($user, 200);
+        $photos = UserPhoto::where('user_account_id', $user->id)->select('link')->get();
+        $interests = $user->interests;
+        $relationships = $user->relationships;
+        $data = [];
+        array_push($data, [
+            "id" => $user->id,
+            "fullname" => $user->fullname,
+            'bio' => $user->bio,
+            'age' => $user->age,
+            'locking_for' => $user->looking_for,
+            'location' => $user->location,
+            "interests" => $interests,
+            "relationships"=> $relationships,
+            "photos" => $photos
+        ]);
+        return response()->json($data, 200);
     }
 }

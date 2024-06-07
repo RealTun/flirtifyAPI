@@ -14,18 +14,16 @@ class RelationshipTypeController extends Controller
     public function getRelationships()
     {
         $relationships = DB::table('relationship_type')->get();
-        return response()->json($relationships, 201);
+        return response()->json($relationships, 200);
     }
 
-    public function getRelationshipByUser(int $id)
+    public function getRelationshipByUser()
     {
-        if ($id != auth('sanctum')->user()->id) {
-            return response()->json(['message' => 'Not allowed'], 403);
-        }
+        $user = auth('sanctum')->user();
         $data = DB::table('interested_in_relation')
             ->join('user_account', 'user_account_id', 'user_account.id')
             ->join('relationship_type', 'relationship_type_id', 'relationship_type.id')
-            ->where('user_account.id', $id)
+            ->where('user_account.id', $user->id)
             ->pluck('relationship_type.name_relationship');
         if(count($data) < 1){
             return response()->json([
@@ -35,7 +33,7 @@ class RelationshipTypeController extends Controller
         }
         return response()->json([
             'status' => 'success',
-            'user_name' => auth('sanctum')->user()->fullname,
+            'user_name' => $user->fullname,
             'name_relationship' => $data
         ], 200);
     }
@@ -78,7 +76,7 @@ class RelationshipTypeController extends Controller
             'user_account_id' => $user_id,
             'relationship_type_id' => $relationship_type_id
         ]);
-        return redirect()->route('getRelationshipUser', ['id' => $user_id]);
+        return redirect()->route('getRelationshipUser');
     }
 
     public function deleteUserRelationship(int $relationship_type_id)

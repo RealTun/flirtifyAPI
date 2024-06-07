@@ -11,12 +11,9 @@ use Illuminate\Support\Facades\Validator;
 class PhotoController extends Controller
 {
     //
-    public function getUserPhotos(int $id)
+    public function getUserPhotos()
     {
-        if ($id != auth('sanctum')->user()->id) {
-            return response()->json(['message' => 'Not allowed'], 403);
-        }
-
+        $id = auth("sanctum")->user()->id;
         $paths = UserPhoto::where('user_account_id', $id)->pluck('link');
         if (count($paths) < 1) {
             return response()->json([
@@ -29,7 +26,7 @@ class PhotoController extends Controller
         }
         return response()->json([
             'status' => 'success',
-            'link' => $paths,
+            'imgUrl' => $paths,
         ], 200);
     }
 
