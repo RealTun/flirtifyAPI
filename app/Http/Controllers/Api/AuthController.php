@@ -25,7 +25,7 @@ class AuthController extends Controller
             'gender' => 'nullable|integer|in:0,1,2',
             'looking_for' => 'nullable|integer|in:0,1,2',
             'location' => 'nullable|string|max:50',
-            'confirmation_code' => 'required|string|size:4',
+            'confirmation_code' => 'required|string|size:6',
             'confirmation_time' => 'nullable|date'
         ];
         $validator = Validator::make($request->all(), $rules);
@@ -89,9 +89,22 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         $user = $request->user('sanctum');
-        $photos = UserPhoto::where('user_account_id', $user->id)->select('link')->get();
-        $interests = $user->interests;
-        $relationships = $user->relationships;
+        $photos = [];
+        $interests = [];
+        $relationships = [];
+
+        foreach ($user->photos as $item) {
+            array_push($photos, $item->link);
+        }
+
+        foreach ($user->interests as $item) {
+            array_push($interests, $item->interestType->name_interest_type);
+        }
+
+        foreach ($user->relationships as $item) {
+            array_push($relationships, $item->relationshipType->name_relationship);
+        }
+
         $data = [];
         array_push($data, [
             "id" => $user->id,

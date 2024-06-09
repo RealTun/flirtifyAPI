@@ -36,6 +36,16 @@ class User extends Authenticatable
         return $this->hasMany(UserPhoto::class, 'user_account_id');
     }
 
+    public function relationships()
+    {
+        return $this->hasMany(InterestedInRelation::class, 'user_account_id');
+    }
+
+    public function interests()
+    {
+        return $this->hasMany(InterestUser::class, 'user_account_id');
+    }
+
     // Define the relationship with the UserConnection model as user1
     public function connectionsAsUser1()
     {

@@ -10,24 +10,51 @@ use App\Events\MessageSent;
 
 class MessageController extends Controller
 {
-    public function show(){
+    public function show()
+    {
         return view('chat');
     }
 
-    public function index(int $id)
+    public function index()
     {
-        if ($id != auth('sanctum')->user()->id) {
-            return response()->json(['message' => 'Not allowed'], 403);
-        }
+        $id = auth('sanctum')->user()->id;
         $messages = Message::where('sender_id', $id)->orderBy('time_sent')->get()->toArray();
         $data = [];
-        foreach ($messages as $message){
+        foreach ($messages as $message) {
             array_push($data, [
                 'message' => $message['message_content'],
                 'time_sent' => $message['time_sent'],
-            ]);  
+            ]);
         }
         return response()->json($data, 200);
+    }
+
+    public function getSenderMessages(int $receiver_id)
+    {
+        $id = auth('sanctum')->user()->id;
+        $messages = Message::where(function ($query) use ($id, $receiver_id) {
+            $query->where('sender_id', $id)
+                ->where('receiver_id', $receiver_id);
+            })
+            // ->orWhere(function ($query) use ($id, $receiver_id) {
+            //     $query->where('sender_id', $id)
+            //         ->where('receiver_id', $receiver_id);
+            // })
+            ->orderBy('time_sent', 'desc')
+            ->get();
+        return response()->json($messages, 200);
+    }
+
+    public function getReceiverMessages(int $receiver_id)
+    {
+        $id = auth('sanctum')->user()->id;
+        $messages = Message::where(function ($query) use ($id, $receiver_id) {
+            $query->where('receiver_id', $id)
+                ->where('sender_id', $receiver_id);
+            })
+            ->orderBy('time_sent', 'desc')
+            ->get();
+        return response()->json($messages, 200);
     }
 
     public function store(Request $request)
@@ -38,7 +65,7 @@ class MessageController extends Controller
             'receiver_id' => 'required|exists:user_account,id',
             'message_content' => 'required',
         ];
-        
+
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return response()->json([
@@ -47,19 +74,15 @@ class MessageController extends Controller
             ], 400);
         }
 
-        if ($request->sender_id != auth('sanctum')->user()->id) {
-            return response()->json(['message' => 'Not allowed'], 403);
-        }
+        Message::create([
+            'match_id' => $request->match_id,
+            'sender_id' => $request->sender_id,
+            'receiver_id' => $request->receiver_id,
+            'message_content' => $request->message_content,
+        ]);
 
-        // $message = Message::create([
-        //     'match_id' => $request->match_id,
-        //     'sender_id' => $request->sender_id,
-        //     'receiver_id' => $request->receiver_id,
-        //     'message_content' => $request->message_content,
-        // ]);
-        
         // Broadcast the message event
-        event(new MessageSent($request->user('sanctum'), $request->message_content));
+        // event(new MessageSent($request->user('sanctum'), $request->message_content));
         return response()->json([
             'status' => 'success',
             'message' => $request->message_content

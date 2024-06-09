@@ -47,8 +47,10 @@ Route::middleware(['auth.api', 'check.token.expiration'])->group(function () {
     Route::post('user-photos/upload', [PhotoController::class,'storeUserPhotos']);
 
     // chat
-    Route::get('/chat/{id}', [MessageController::class, 'index']);
-    Route::post('/chat', [MessageController::class, 'store']);
+    Route::get('/chat', [MessageController::class, 'index']);
+    Route::get('/chat/messages/sender/{id}', [MessageController::class, 'getSenderMessages']);
+    Route::get('/chat/messages/receiver/{id}', [MessageController::class, 'getReceiverMessages']);
+    Route::post('/chat/send', [MessageController::class, 'store']);
 });
 
-Route::get('/chat', [MessageController::class, 'show'])->name('chat.show');
+// Route::get('/chat', [MessageController::class, 'show'])->name('chat.show');

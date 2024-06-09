@@ -13,4 +13,9 @@ class InterestType extends Model
     protected $fillable = [
         'name_interest_type',
     ];
+
+    public function interestUsers()
+    {
+        return $this->hasMany(InterestUser::class, 'interest_type_id');
+    }
 }

@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Message;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use App\Models\UserConnection;
 use App\Models\UserPhoto;
 
 class MatchController extends Controller
@@ -15,8 +17,7 @@ class MatchController extends Controller
     public function getUserToConnect()
     {
         $id = auth('sanctum')->user()->id;
-        $users_id = DB::table('user_account')
-            ->whereRaw('gender = (SELECT looking_for FROM user_account WHERE id = ?)', [$id])
+        $users_id = User::whereRaw('gender = (SELECT looking_for FROM user_account WHERE id = ?)', [$id])
             ->whereRaw('looking_for = (SELECT gender FROM user_account WHERE id = ?)', [$id])
             ->whereNotIn('id', function ($query) use ($id) {
                 $query->select('user2_id')
@@ -28,9 +29,22 @@ class MatchController extends Controller
         $data = [];
         foreach ($users_id as $user_id) {
             $user = User::find($user_id);
-            $photos = UserPhoto::where('user_account_id', $user_id)->select('link')->get();
-            $interests = $user->interests;
-            $relationships = $user->relationships;
+            $photos = [];
+            $interests = [];
+            $relationships = [];
+    
+            foreach ($user->photos as $item) {
+                array_push($photos, $item->link);
+            }
+    
+            foreach ($user->interests as $item) {
+                array_push($interests, $item->interestType->name_interest_type);
+            }
+    
+            foreach ($user->relationships as $item) {
+                array_push($relationships, $item->relationshipType->name_relationship);
+            }
+
             array_push($data, [
                 "id" => $user->id,
                 "fullname" => $user->fullname,
@@ -39,7 +53,7 @@ class MatchController extends Controller
                 'locking_for' => $user->looking_for,
                 'location' => $user->location,
                 "interests" => $interests,
-                "relationships"=> $relationships,
+                "relationships" => $relationships,
                 "photos" => $photos
             ]);
         }
@@ -54,21 +68,25 @@ class MatchController extends Controller
     {
         $id = auth('sanctum')->user()->id;
         // collection user2_id by user1_id
-        $matchers_id = DB::table('user_connection')
-            ->whereNotNull('match_date')
+        $matchers_id = UserConnection::whereNotNull('match_date')
             ->where("user1_id", $id)
             ->pluck("user2_id");
 
         $matchers = [];
         foreach ($matchers_id as $matcher_id) {
             $user = User::select('id', 'fullname')->find($matcher_id);
-            $photo = UserPhoto::where('user_account_id', $matcher_id)->select('link')->first();
+            $photo = UserPhoto::where('user_account_id', $matcher_id)->first();
+            $match = UserConnection::where('user1_id', $id)
+                                        ->where('user2_id', $matcher_id)->first();
+            $message = Message::where('match_id', $match->id)->orderBy('time_sent', 'desc')->first();
 
             array_push($matchers, [
                 [
-                    "id" => $user->id,
+                    "matcher_id" => $user->id,
+                    "match_id" => $match->id,
                     "fullname" => $user->fullname,
-                    "imageUrl" => $photo->link
+                    "imageUrl" => $photo->link,
+                    "last_message" => $message->message_content
                 ]
             ]);
         }
@@ -96,7 +114,7 @@ class MatchController extends Controller
 
         $user1_id = $request->user('sanctum')->id;
         $user2_id = $request->user2_id;
-        $isExisted = DB::table("user_connection")->where([
+        $isExisted = UserConnection::where([
             'user1_id' => $user1_id,
             'user2_id' => $user2_id
         ])->exists();
@@ -122,22 +140,19 @@ class MatchController extends Controller
             'user2_id' => $user2_id
         ]);
         // check 2 user is matched
-        $isMatched = DB::table('user_connection')
-            ->where('user1_id', $user2_id)
+        $isMatched = UserConnection::where('user1_id', $user2_id)
             ->where('user2_id', $user1_id)
             ->exists();
         if ($isMatched) {
             $currentTime = date('Y-m-d H:i:s');
             // update column match_date in user_connection, mark it is matched
-            DB::table('user_connection')
-                ->where('user1_id', $user1_id)
+            UserConnection::where('user1_id', $user1_id)
                 ->where('user2_id', $user2_id)
                 ->update([
                     'match_date' => $currentTime
                 ]);
             ////
-            DB::table('user_connection')
-                ->where('user1_id', $user2_id)
+            UserConnection::where('user1_id', $user2_id)
                 ->where('user2_id', $user1_id)
                 ->update([
                     'match_date' => $currentTime
