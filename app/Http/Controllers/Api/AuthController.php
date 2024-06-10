@@ -86,15 +86,15 @@ class AuthController extends Controller
         return response()->json(['message' => 'No authenticated user found.'], 401);
     }
 
-    public function user(Request $request)
+    public function user()
     {
-        $user = $request->user('sanctum');
+        $user = auth('sanctum')->user();
         $photos = [];
         $interests = [];
         $relationships = [];
 
         foreach ($user->photos as $item) {
-            array_push($photos, $item->link);
+            array_push($photos, $item->imageUrl());
         }
 
         foreach ($user->interests as $item) {

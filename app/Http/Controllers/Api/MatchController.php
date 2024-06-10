@@ -32,15 +32,15 @@ class MatchController extends Controller
             $photos = [];
             $interests = [];
             $relationships = [];
-    
+
             foreach ($user->photos as $item) {
-                array_push($photos, $item->link);
+                array_push($photos, $item->imageUrl());
             }
-    
+
             foreach ($user->interests as $item) {
                 array_push($interests, $item->interestType->name_interest_type);
             }
-    
+
             foreach ($user->relationships as $item) {
                 array_push($relationships, $item->relationshipType->name_relationship);
             }
@@ -58,10 +58,7 @@ class MatchController extends Controller
             ]);
         }
 
-        return response()->json([
-            'message' => 'success',
-            'users' => $data
-        ], 200);
+        return response()->json($data, 200);
     }
 
     public function getMatchersByUser()
@@ -77,24 +74,19 @@ class MatchController extends Controller
             $user = User::select('id', 'fullname')->find($matcher_id);
             $photo = UserPhoto::where('user_account_id', $matcher_id)->first();
             $match = UserConnection::where('user1_id', $id)
-                                        ->where('user2_id', $matcher_id)->first();
+                ->where('user2_id', $matcher_id)->first();
             $message = Message::where('match_id', $match->id)->orderBy('time_sent', 'desc')->first();
 
             array_push($matchers, [
-                [
-                    "matcher_id" => $user->id,
-                    "match_id" => $match->id,
-                    "fullname" => $user->fullname,
-                    "imageUrl" => $photo->link,
-                    "last_message" => $message->message_content
-                ]
+                "matcher_id" => $user->id,
+                "match_id" => $match->id,
+                "fullname" => $user->fullname,
+                "imageUrl" => $photo->imageUrl(),
+                "last_message" => $message->message_content
             ]);
         }
 
-        return response()->json([
-            'status' => 'success',
-            'matchers' => $matchers
-        ], 201);
+        return response()->json($matchers, 201);
     }
 
     public function storeUserLike(Request $request)

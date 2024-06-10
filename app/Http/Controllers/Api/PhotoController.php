@@ -22,7 +22,7 @@ class PhotoController extends Controller
             ], 400);
         }
         for ($i = 0; $i < count($paths); $i++){
-            $paths[$i] = env('CLOUDFLARE_R2_URL') . $paths[$i];
+            $paths[$i] = env('CLOUDFLARE_R2_URL') .'/'. $paths[$i];
         }
         return response()->json([
             'status' => 'success',

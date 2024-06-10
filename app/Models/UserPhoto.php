@@ -20,4 +20,8 @@ class UserPhoto extends Model
     {
         return $this->belongsTo(User::class, 'user_account_id');
     }
+
+    public function imageUrl(){
+        return env('CLOUDFLARE_R2_URL').'/'. $this->link;
+    }
 }

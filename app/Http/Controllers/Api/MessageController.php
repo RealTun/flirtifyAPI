@@ -74,7 +74,7 @@ class MessageController extends Controller
             ], 400);
         }
 
-        Message::create([
+        $message = Message::create([
             'match_id' => $request->match_id,
             'sender_id' => $request->sender_id,
             'receiver_id' => $request->receiver_id,
@@ -83,9 +83,6 @@ class MessageController extends Controller
 
         // Broadcast the message event
         // event(new MessageSent($request->user('sanctum'), $request->message_content));
-        return response()->json([
-            'status' => 'success',
-            'message' => $request->message_content
-        ], 201);
+        return response()->json($message, 201);
     }
 }
