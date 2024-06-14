@@ -15,7 +15,6 @@ class User extends Authenticatable
     public $timestamps = false;
     protected $fillable = [
         'email',
-        'phone',
         'pw',
         'fullname',
         'bio',
@@ -23,8 +22,6 @@ class User extends Authenticatable
         'gender',
         'looking_for',
         'location',
-        'confirmation_code',
-        'confirmation_time'
     ];
 
     protected $hidden = [

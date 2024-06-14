@@ -17,7 +17,6 @@ class AuthController extends Controller
     {
         $rules = [
             'email' => 'required|email|unique:user_account,email|max:100',
-            'phone' => 'required|unique:user_account,phone|max:20',
             'pw' => 'required|string|min:8|max:256',
             'fullname' => 'required|string|max:100',
             'bio' => 'nullable|string',
@@ -25,8 +24,6 @@ class AuthController extends Controller
             'gender' => 'nullable|integer|in:0,1,2',
             'looking_for' => 'nullable|integer|in:0,1,2',
             'location' => 'nullable|string|max:50',
-            'confirmation_code' => 'required|string|size:6',
-            'confirmation_time' => 'nullable|date'
         ];
         $validator = Validator::make($request->all(), $rules);
 
@@ -36,22 +33,25 @@ class AuthController extends Controller
 
         $user = User::create([
             'email' => $request->email,
-            'phone' => $request->phone,
             'pw' => Hash::make($request->pw),
             'fullname' => $request->fullname,
             'bio' => $request->bio,
             'age' => $request->age,
             'gender' => $request->gender,
             'looking_for' => $request->looking_for,
-            'location' => $request->location,
-            'confirmation_code' => $request->confirmation_code,
-            'confirmation_time' => $request->confirmation_time
+            'location' => $request->location
         ]);
 
+        // return response()->json($user, 201);
+        $token = $user->createToken('auth_token')->plainTextToken;
+        $expiration = Carbon::now()->addDays(7);
+        $user->tokens()->where('tokenable_id', $user->id)->update(['expires_at' => $expiration]);
+
         return response()->json([
-            'message' => 'Registration successful',
             'user' => $user,
-        ], 201);
+            'access_token' => $token,
+            'token_type' => 'Bearer',
+        ], 200);
     }
 
     public function login(Request $request)
@@ -62,9 +62,9 @@ class AuthController extends Controller
 
         if ($user && Hash::check($credentials['password'], $user->pw)) {
             $token = $user->createToken('auth_token')->plainTextToken;
-            $expiration = Carbon::now()->addDays(15);
+            $expiration = Carbon::now()->addDays(7);
             $user->tokens()->where('tokenable_id', $user->id)->update(['expires_at' => $expiration]);
-            // return response()->json(['token' => $token, 'user' => $user]);
+
             return response()->json([
                 'user' => $user,
                 'access_token' => $token,
@@ -114,7 +114,7 @@ class AuthController extends Controller
             'locking_for' => $user->looking_for,
             'location' => $user->location,
             "interests" => $interests,
-            "relationships"=> $relationships,
+            "relationships" => $relationships,
             "photos" => $photos
         ]);
         return response()->json($data, 200);

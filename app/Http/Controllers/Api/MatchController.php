@@ -75,7 +75,17 @@ class MatchController extends Controller
             $photo = UserPhoto::where('user_account_id', $matcher_id)->first();
             $match = UserConnection::where('user1_id', $id)
                 ->where('user2_id', $matcher_id)->first();
-            $message = Message::where('match_id', $match->id)->orderBy('time_sent', 'desc')->first();
+            // $message = Message::where('match_id', $match->id)->orderBy('time_sent', 'desc')->first();
+            $message = Message::where(function ($query) use ($id, $matcher_id) {
+                $query->where('sender_id', $id)
+                    ->where('receiver_id', $matcher_id);
+                })
+                ->orWhere(function ($query) use ($id, $matcher_id) {
+                    $query->where('receiver_id', $id)
+                        ->where('sender_id', $matcher_id);
+                })
+                ->orderBy('time_sent', 'desc')
+                ->first();
 
             array_push($matchers, [
                 "matcher_id" => $user->id,
@@ -92,7 +102,6 @@ class MatchController extends Controller
     public function storeUserLike(Request $request)
     {
         $rules = [
-            // 'user1_id' => 'required',
             'user2_id' => 'required',
         ];
 
@@ -127,7 +136,7 @@ class MatchController extends Controller
             ], 400);
         }
 
-        DB::table("user_connection")->insert([
+        UserConnection::create([
             'user1_id' => $user1_id,
             'user2_id' => $user2_id
         ]);
@@ -152,8 +161,6 @@ class MatchController extends Controller
             // response
             return response()->json([
                 'status' => "success",
-                // 'user1' => $user1_id,
-                // 'user2' => $user2_id,
                 'message' => "You matched!"
             ], 200);
         }
