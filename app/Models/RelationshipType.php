@@ -16,8 +16,13 @@ class RelationshipType extends Model
         'name_relationship',
     ];
 
-    public function interestedInRelations()
+    // public function interestedInRelations()
+    // {
+    //     return $this->hasMany(InterestedInRelation::class, 'relationship_type_id');
+    // }
+
+    public function users()
     {
-        return $this->hasMany(InterestedInRelation::class, 'relationship_type_id');
+        return $this->hasMany(User::class, 'relationship');
     }
 }

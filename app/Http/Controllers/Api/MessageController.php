@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Message;
+use App\Models\UserBlock;
 use App\Models\UserPhoto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -103,5 +104,44 @@ class MessageController extends Controller
         // Broadcast the message event
         event(new MessageSent($message->id, $message->match_id, $message->sender_id, $message->receiver_id, $message->message_content, $data->time_sent, $photo->imageUrl(), true));
         return response()->json($response, 201);
+    }
+
+    public function blockUser(Request $request)
+    {
+        $rules = [
+            'user_account_id_blocked' => 'required',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(["status" => "block error"], 400);
+        }
+
+        $data = [
+            "user_account_id" => $request->user('sanctum')->id,
+            "user_account_id_blocked" => $request->user_account_id_blocked,
+        ];
+
+        $isExisted = UserBlock::where($data)->exists();
+        if($isExisted){
+            return response()->json(["status" => "block error"], 400);
+        }
+
+        UserBlock::create($data);
+
+        return response()->json(["status" => "block success"], 201);
+    }
+
+    public function unblockUser(int $user_id_blocked)
+    {
+        $id = auth('sanctum')->user()->id;
+        $user = UserBlock::where("user_account_id_blocked", $user_id_blocked)
+            ->where("user_account_id", $id)
+            ->first();
+        if ($user) {
+            $user->delete();
+            return response()->json(["status" => "unlock success"], 200);
+        }
+        return response()->json(["status" => "unlock error"], 400);
     }
 }

@@ -21,6 +21,7 @@ class User extends Authenticatable
         'age',
         'gender',
         'looking_for',
+        'relationship',
         'location',
     ];
 
@@ -33,9 +34,13 @@ class User extends Authenticatable
         return $this->hasMany(UserPhoto::class, 'user_account_id');
     }
 
-    public function relationships()
+    // public function relationships()
+    // {
+    //     return $this->hasMany(InterestedInRelation::class, 'user_account_id');
+    // }
+    public function relationshipType()
     {
-        return $this->hasMany(InterestedInRelation::class, 'user_account_id');
+        return $this->belongsTo(RelationshipType::class, 'relationship_type');
     }
 
     public function interests()

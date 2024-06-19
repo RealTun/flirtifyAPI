@@ -20,9 +20,10 @@ class AuthController extends Controller
             'pw' => 'required|string|min:8|max:256',
             'fullname' => 'required|string|max:100',
             'bio' => 'nullable|string',
-            'age' => 'nullable|integer|min:18',
-            'gender' => 'nullable|integer|in:0,1,2',
-            'looking_for' => 'nullable|integer|in:0,1,2',
+            'age' => 'integer|min:18',
+            'gender' => 'integer|in:0,1,2',
+            'looking_for' => 'integer|in:0,1,2',
+            'relationship_type' => 'integer|in:1,2,3,4,5,6',
             'location' => 'nullable|string|max:50',
         ];
         $validator = Validator::make($request->all(), $rules);
@@ -39,6 +40,7 @@ class AuthController extends Controller
             'age' => $request->age,
             'gender' => $request->gender,
             'looking_for' => $request->looking_for,
+            'relationship' => $request->relationship_type,
             'location' => $request->location
         ]);
 
@@ -91,7 +93,7 @@ class AuthController extends Controller
         $user = auth('sanctum')->user();
         $photos = [];
         $interests = [];
-        $relationships = [];
+        // $relationships = [];
 
         foreach ($user->photos as $item) {
             array_push($photos, $item->imageUrl());
@@ -101,9 +103,9 @@ class AuthController extends Controller
             array_push($interests, $item->interestType->name_interest_type);
         }
 
-        foreach ($user->relationships as $item) {
-            array_push($relationships, $item->relationshipType->name_relationship);
-        }
+        // foreach ($user->relationships as $item) {
+        //     array_push($relationships, $item->relationshipType->name_relationship);
+        // }
 
         $data = [];
         array_push($data, [
@@ -114,7 +116,7 @@ class AuthController extends Controller
             'locking_for' => $user->looking_for,
             'location' => $user->location,
             "interests" => $interests,
-            "relationships" => $relationships,
+            "relationship" => $user->relationshipType->name_relationship,
             "photos" => $photos
         ]);
         return response()->json($data, 200);

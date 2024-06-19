@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\MessageController;
 use App\Http\Controllers\Api\RelationshipTypeController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PhotoController;
+use App\Http\Controllers\Api\PreferenceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -44,13 +45,21 @@ Route::middleware(['auth.api'])->group(function () {
     Route::post('matchers', [MatchController::class, 'storeUserLike']);
 
     // photo
-    Route::get('user-photos', [PhotoController::class,'getUserPhotos']);
-    Route::post('user-photos/upload', [PhotoController::class,'storeUserPhotos']);
+    Route::get('user-photos', [PhotoController::class, 'getUserPhotos']);
+    Route::post('user-photos/upload', [PhotoController::class, 'storeUserPhotos']);
 
     // chat
     // Route::get('/chat', [MessageController::class, 'index']);
     Route::get('/chat/messages/{receiver_id}', [MessageController::class, 'getMessages']);
     Route::post('/chat/send', [MessageController::class, 'store']);
+
+    //block
+    Route::post('user/block', [MessageController::class, 'blockUser']);
+    Route::delete('user/unblock/{id}', [MessageController::class, 'unblockUser']);
+
+    //preference
+    Route::post('user/storePreference', [PreferenceController::class, 'storePreference']);
+    Route::patch('user/updatePreference', [PreferenceController::class, 'updatePreference']);
 });
 
 // Route::get('/chat', [MessageController::class, 'show'])->name('chat.show');

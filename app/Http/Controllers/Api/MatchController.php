@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use App\Models\UserBlock;
 use App\Models\UserConnection;
 use App\Models\UserPhoto;
 
@@ -24,6 +25,11 @@ class MatchController extends Controller
                     ->from('user_connection')
                     ->where('user1_id', '=', $id);
             })
+            ->whereNotIn('id', function ($query) use ($id) {
+                $query->select('user_account_id_blocked')
+                    ->from('block_user')
+                    ->where('user_account_id', '=', $id);
+            })
             ->pluck('id');
 
         $data = [];
@@ -31,7 +37,7 @@ class MatchController extends Controller
             $user = User::find($user_id);
             $photos = [];
             $interests = [];
-            $relationships = [];
+            // $relationships = [];
 
             foreach ($user->photos as $item) {
                 array_push($photos, $item->imageUrl());
@@ -41,9 +47,9 @@ class MatchController extends Controller
                 array_push($interests, $item->interestType->name_interest_type);
             }
 
-            foreach ($user->relationships as $item) {
-                array_push($relationships, $item->relationshipType->name_relationship);
-            }
+            // foreach ($user->relationships as $item) {
+            //     array_push($relationships, $item->relationshipType->name_relationship);
+            // }
 
             array_push($data, [
                 "id" => $user->id,
@@ -53,7 +59,7 @@ class MatchController extends Controller
                 'locking_for' => $user->looking_for,
                 'location' => $user->location,
                 "interests" => $interests,
-                "relationships" => $relationships,
+                "relationship" => $user->relationshipType->name_relationship,
                 "photos" => $photos
             ]);
         }
