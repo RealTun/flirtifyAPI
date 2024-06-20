@@ -21,7 +21,7 @@ class User extends Authenticatable
         'age',
         'gender',
         'looking_for',
-        'relationship',
+        'relationship_type',
         'location',
     ];
 

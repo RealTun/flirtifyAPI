@@ -97,12 +97,12 @@ class MatchController extends Controller
                 "matcher_id" => $user->id,
                 "match_id" => $match->id,
                 "fullname" => $user->fullname,
-                "imageUrl" => $photo->imageUrl(),
-                "last_message" => $message->message_content
+                "imageUrl" => $photo != null ? $photo->imageUrl() : "https://i.pravatar.cc/300",
+                "last_message" => $message != null ? $message->message_content : null,
             ]);
         }
 
-        return response()->json($matchers, 201);
+        return response()->json($matchers, 200);
     }
 
     public function storeUserLike(Request $request)
