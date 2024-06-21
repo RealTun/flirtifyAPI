@@ -1,6 +1,5 @@
 <?php
 
-use App\Events\MessageSent;
 use App\Http\Controllers\Api\InterestTypeController;
 use App\Http\Controllers\Api\MatchController;
 use App\Http\Controllers\Api\MessageController;
@@ -8,12 +7,8 @@ use App\Http\Controllers\Api\RelationshipTypeController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PhotoController;
 use App\Http\Controllers\Api\PreferenceController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');
 
 // authen
 Route::post('register', [AuthController::class, 'register']);
@@ -34,9 +29,7 @@ Route::middleware(['auth.api'])->group(function () {
     Route::delete('interest-type/user/{id}', [InterestTypeController::class, 'deleteUserInterest']);
 
     // relationship
-    Route::get('relationship-type/user', [RelationshipTypeController::class, 'getRelationshipByUser'])->name('getRelationshipUser');
-    Route::post('relationship-type/user', [RelationshipTypeController::class, 'storeUserRelationship']);
-    Route::delete('relationship-type/user/{id}', [RelationshipTypeController::class, 'deleteUserRelationship']);
+    Route::patch('relationship-type/user', [RelationshipTypeController::class, 'updateRelationshipType']);
 
     // connect
     Route::get('users-connect', [MatchController::class, 'getUserToConnect']);
@@ -63,5 +56,3 @@ Route::middleware(['auth.api'])->group(function () {
     Route::post('user/storePreference', [PreferenceController::class, 'storePreference']);
     Route::patch('user/updatePreference', [PreferenceController::class, 'updatePreference']);
 });
-
-// Route::get('/chat', [MessageController::class, 'show'])->name('chat.show');

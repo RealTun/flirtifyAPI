@@ -13,11 +13,6 @@ use App\Models\User;
 
 class MessageController extends Controller
 {
-    public function show()
-    {
-        return view('chat');
-    }
-
     public function index()
     {
         $id = auth('sanctum')->user()->id;
