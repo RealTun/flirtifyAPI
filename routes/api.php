@@ -25,7 +25,8 @@ Route::get('relationship-type', [RelationshipTypeController::class, 'getRelation
 // protect route
 Route::middleware(['auth.api'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
-    Route::get('user', [AuthController::class, 'user'])->name('getUser');
+    Route::get('user', [AuthController::class, 'getUser'])->name('getUser');
+    Route::patch('user', [AuthController::class, 'updateUser']);
 
     // interest
     Route::get('interest-type/user', [InterestTypeController::class, 'getInterestByUser'])->name('getInterestUser');
@@ -47,6 +48,7 @@ Route::middleware(['auth.api'])->group(function () {
     // photo
     Route::get('user-photos', [PhotoController::class, 'getUserPhotos']);
     Route::post('user-photos/upload', [PhotoController::class, 'storeUserPhotos']);
+    Route::delete('user/photos/delete/{photo_id}', [PhotoController::class, 'deleteUserPhotos']);
 
     // chat
     // Route::get('/chat', [MessageController::class, 'index']);

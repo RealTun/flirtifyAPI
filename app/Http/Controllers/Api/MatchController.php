@@ -109,18 +109,20 @@ class MatchController extends Controller
     {
         $rules = [
             'user2_id' => 'required',
+            'action' => 'required'
         ];
 
         $validator = Validator::make($request->all(), $rules);
         if ($validator->fails()) {
             return response()->json([
                 'status' => 'error',
-                'message' => "user2_id cannot be left blank!"
+                'message' => "Cannot store action. Try again!"
             ], 400);
         }
 
         $user1_id = $request->user('sanctum')->id;
         $user2_id = $request->user2_id;
+        $action = $request->action;
         $isExisted = UserConnection::where([
             'user1_id' => $user1_id,
             'user2_id' => $user2_id
@@ -133,23 +135,30 @@ class MatchController extends Controller
         } else if ($user1_id == $user2_id) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Cannot like yourself!'
+                'message' => 'Cannot action yourself!'
             ], 400);
         } else if ($isExisted) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'You have liked this person before!'
+                'message' => 'You have action this person before!'
             ], 400);
         }
 
         UserConnection::create([
             'user1_id' => $user1_id,
-            'user2_id' => $user2_id
+            'user2_id' => $user2_id,
+            'action' => $action
         ]);
         // check 2 user is matched
-        $isMatched = UserConnection::where('user1_id', $user2_id)
-            ->where('user2_id', $user1_id)
-            ->exists();
+        $isMatched = UserConnection::where(function($query) use ($user1_id, $user2_id) {
+            $query->where('user1_id', $user2_id)
+                  ->where('user2_id', $user1_id)
+                  ->where('action', 1);
+        })->orWhere(function($query) use ($user1_id, $user2_id) {
+            $query->where('user1_id', $user1_id)
+                  ->where('user2_id', $user2_id)
+                  ->where('action', 1);
+        })->count() === 2;
         if ($isMatched) {
             $currentTime = date('Y-m-d H:i:s');
             // update column match_date in user_connection, mark it is matched
@@ -173,7 +182,7 @@ class MatchController extends Controller
 
         return response()->json([
             'status' => "success",
-            'message' => "Wating they like you!"
+            'message' => "Wating they action to you!"
         ], 201);
     }
 }

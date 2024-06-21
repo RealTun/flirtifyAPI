@@ -88,7 +88,7 @@ class AuthController extends Controller
         return response()->json(['message' => 'No authenticated user found.'], 401);
     }
 
-    public function user()
+    public function getUser()
     {
         $user = auth('sanctum')->user();
         $photos = [];
@@ -107,8 +107,7 @@ class AuthController extends Controller
         //     array_push($relationships, $item->relationshipType->name_relationship);
         // }
 
-        $data = [];
-        array_push($data, [
+        $data = [
             "id" => $user->id,
             "fullname" => $user->fullname,
             'bio' => $user->bio,
@@ -118,7 +117,34 @@ class AuthController extends Controller
             "interests" => $interests,
             "relationship" => $user->relationshipType->name_relationship,
             "photos" => $photos
-        ]);
+        ];
         return response()->json($data, 200);
+    }
+
+    public function updateUser(Request $request)
+    {
+        $rules = [
+            // 'email' => 'required|email|unique:user_account,email|max:100',
+            'pw' => 'required|string|min:8|max:256',
+            'fullname' => 'required|string|max:100',
+            'bio' => 'nullable|string',
+            'age' => 'integer|min:18',
+            'gender' => 'integer|in:0,1,2',
+            'looking_for' => 'integer|in:0,1,2',
+            'relationship_type' => 'integer|in:1,2,3,4,5,6',
+            'location' => 'nullable|string|max:50',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 400);
+        }
+
+        $user = $request->user('sanctum');
+        if($user->update($request->all())) {
+            return response()->json($user, 200);
+        }
+        return response()->json(["status" => "update user error"], 400);
     }
 }

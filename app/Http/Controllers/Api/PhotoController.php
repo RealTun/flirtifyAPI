@@ -76,5 +76,14 @@ class PhotoController extends Controller
                 'message' => 'Image uploaded successfully!',
             ], 200);
         }
+        return response()->json([
+            'status' => 'error',
+            'message' => "Cannot upload this photo! Try Again"
+        ], 400);
+    }
+
+    public function deleteUserPhotos(int $photo_id)
+    {
+        
     }
 }
