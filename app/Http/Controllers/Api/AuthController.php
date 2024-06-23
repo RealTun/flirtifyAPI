@@ -128,9 +128,7 @@ class AuthController extends Controller
             'pw' => 'required|string|min:8|max:256',
             'fullname' => 'required|string|max:100',
             'bio' => 'nullable|string',
-            'age' => 'integer|min:18',
             'gender' => 'integer|in:0,1,2',
-            'looking_for' => 'integer|in:0,1,2',
             'relationship_type' => 'integer|in:1,2,3,4,5,6',
             'location' => 'nullable|string|max:50',
         ];
@@ -143,6 +141,24 @@ class AuthController extends Controller
 
         $user = $request->user('sanctum');
         if($user->update($request->all())) {
+            return response()->json($user, 200);
+        }
+        return response()->json(["status" => "update user error"], 400);
+    }
+
+    public function updateLookingFor(Request $request)
+    {
+        $rules = [
+            'looking_for' => 'integer|in:0,1,2'
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(['message'=> $validator->errors()], 400);
+        }
+
+        $user = $request->user('sanctum');
+        if($user->updateLookingFor($request->all())) {
             return response()->json($user, 200);
         }
         return response()->json(["status" => "update user error"], 400);

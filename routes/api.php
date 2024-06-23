@@ -22,6 +22,7 @@ Route::middleware(['auth.api'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
     Route::get('user', [AuthController::class, 'getUser'])->name('getUser');
     Route::patch('user', [AuthController::class, 'updateUser']);
+    Route::patch('user/lookingfor', [AuthController::class, 'updateLookingFor']);
 
     // interest
     Route::get('interest-type/user', [InterestTypeController::class, 'getInterestByUser'])->name('getInterestUser');

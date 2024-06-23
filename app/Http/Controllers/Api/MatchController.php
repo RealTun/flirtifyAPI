@@ -59,7 +59,7 @@ class MatchController extends Controller
                 'location' => $user->location,
                 "interests" => $interests,
                 "relationship" => $user->relationshipType->name_relationship,
-                "photos" => $photos
+                "photos" => $photos != null ? $photos : ["https://placebeard.it/500/500", "https://placebeard.it/500/500", "https://placebeard.it/500/500", "https://placebeard.it/500/500"]
             ]);
         }
 
@@ -96,7 +96,7 @@ class MatchController extends Controller
                 "matcher_id" => $user->id,
                 "match_id" => $match->id,
                 "fullname" => $user->fullname,
-                "imageUrl" => $photo != null ? $photo->imageUrl() : "https://i.pravatar.cc/300",
+                "imageUrl" => $photo != null ? $photo->imageUrl() : "https://placebeard.it/500/500",
                 "last_message" => $message != null ? $message->message_content : null,
             ]);
         }
