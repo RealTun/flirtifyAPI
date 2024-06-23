@@ -19,7 +19,7 @@ class RelationshipTypeController extends Controller
 
     public function updateRelationshipType(Request $request){
         $rule = [
-            'relationsip_type_id' => 'required|integer|in:1,2,3,4,5,6',
+            'relationship_type_id' => 'required|integer|in:1,2,3,4,5,6',
         ];
 
         $validator = Validator::make($request->all(), $rule);

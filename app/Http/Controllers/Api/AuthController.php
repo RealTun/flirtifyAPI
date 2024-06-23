@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Models\Preference;
 use App\Models\User;
 use App\Models\UserPhoto;
 use Illuminate\Http\Request;
@@ -40,7 +41,7 @@ class AuthController extends Controller
             'age' => $request->age,
             'gender' => $request->gender,
             'looking_for' => $request->looking_for,
-            'relationship' => $request->relationship_type,
+            'relationship_type' => $request->relationship_type,
             'location' => $request->location
         ]);
 
@@ -48,6 +49,13 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
         $expiration = Carbon::now()->addDays(7);
         $user->tokens()->where('tokenable_id', $user->id)->update(['expires_at' => $expiration]);
+
+        Preference::create([
+            'user_account_id' => $request->user('sanctum')->id,
+            'min_age' => 18,
+            'max_age' => 25,
+            'max_distance' => 15
+        ]);
 
         return response()->json([
             'user' => $user,
@@ -112,11 +120,11 @@ class AuthController extends Controller
             "fullname" => $user->fullname,
             'bio' => $user->bio,
             'age' => $user->age,
-            'locking_for' => $user->looking_for,
+            'looking_for' => $user->looking_for,
             'location' => $user->location,
             "interests" => $interests,
             "relationship" => $user->relationshipType->name_relationship,
-            "photos" => $photos
+            "photos" => $photos != null ? $photos : ["https://placebeard.it/500/500", "https://placebeard.it/500/500", "https://placebeard.it/500/500", "https://placebeard.it/500/500"]
         ];
         return response()->json($data, 200);
     }
@@ -162,5 +170,23 @@ class AuthController extends Controller
             return response()->json($user, 200);
         }
         return response()->json(["status" => "update user error"], 400);
+    }
+
+    public function updateGender(Request $request)
+    {
+        $rules = [
+            'gender' => 'integer|in:0,1,2'
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(['message'=> $validator->errors()], 400);
+        }
+
+        $user = $request->user('sanctum');
+        if($user->updateLookingFor($request->all())) {
+            return response()->json($user, 200);
+        }
+        return response()->json(["status" => "update gender error"], 400);
     }
 }

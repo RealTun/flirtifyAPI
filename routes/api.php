@@ -23,6 +23,7 @@ Route::middleware(['auth.api'])->group(function () {
     Route::get('user', [AuthController::class, 'getUser'])->name('getUser');
     Route::patch('user', [AuthController::class, 'updateUser']);
     Route::patch('user/lookingfor', [AuthController::class, 'updateLookingFor']);
+    Route::patch('user/gender', [AuthController::class, 'updateGender']);
 
     // interest
     Route::get('interest-type/user', [InterestTypeController::class, 'getInterestByUser'])->name('getInterestUser');
@@ -54,6 +55,5 @@ Route::middleware(['auth.api'])->group(function () {
     Route::delete('user/unblock/{id}', [MessageController::class, 'unblockUser']);
 
     //preference
-    Route::post('user/storePreference', [PreferenceController::class, 'storePreference']);
     Route::patch('user/updatePreference', [PreferenceController::class, 'updatePreference']);
 });
