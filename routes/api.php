@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 
 
 // authen
+Route::post('checkDuplicateEmail', [AuthController::class, 'checkDuplicateEmail']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 

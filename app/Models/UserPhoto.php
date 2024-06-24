@@ -22,6 +22,7 @@ class UserPhoto extends Model
     }
 
     public function imageUrl(){
-        return env('CLOUDFLARE_R2_URL').'/'. $this->link;
+        // return env('CLOUDFLARE_R2_URL').'/'. $this->link;
+        return $this->link;
     }
 }

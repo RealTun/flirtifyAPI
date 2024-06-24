@@ -23,9 +23,9 @@ class PhotoController extends Controller
                 'message' => "This user has not set up any photos yet!"
             ], 400);
         }
-        for ($i = 0; $i < count($paths); $i++) {
-            $paths[$i] = env('CLOUDFLARE_R2_URL') . '/' . $paths[$i];
-        }
+        // for ($i = 0; $i < count($paths); $i++) {
+        //     $paths[$i] = env('CLOUDFLARE_R2_URL') . '/' . $paths[$i];
+        // }
         return response()->json([
             'status' => 'success',
             'imgUrl' => $paths,

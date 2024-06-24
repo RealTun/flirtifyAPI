@@ -14,6 +14,19 @@ use Carbon\Carbon;
 
 class AuthController extends Controller
 {
+    public function checkDuplicateEmail(Request $request)
+    {
+        $rules = [
+            'email' => 'unique:user_account,email',
+        ];
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(['status' => 'error'], 400);
+        }
+
+        return response()->json(['status'=> 'success'], 200);
+    }
+    
     public function register(Request $request)
     {
         $rules = [
@@ -30,7 +43,7 @@ class AuthController extends Controller
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
-            return response()->json(['message' => $validator->errors()], 400);
+            return response()->json(['message' => $validator->errors()->first()], 400);
         }
 
         $user = User::create([
@@ -51,7 +64,7 @@ class AuthController extends Controller
         $user->tokens()->where('tokenable_id', $user->id)->update(['expires_at' => $expiration]);
 
         Preference::create([
-            'user_account_id' => $request->user('sanctum')->id,
+            'user_account_id' => $user->id,
             'min_age' => 18,
             'max_age' => 25,
             'max_distance' => 15
