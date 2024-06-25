@@ -44,7 +44,7 @@ Route::middleware(['auth.api'])->group(function () {
     // photo
     Route::get('user-photos', [PhotoController::class, 'getUserPhotos']);
     Route::post('user-photos/upload', [PhotoController::class, 'storeUserPhotos']);
-    Route::delete('user/photos/delete/{photo_id}', [PhotoController::class, 'deleteUserPhotos']);
+    Route::delete('user/photos/delete/{photo_url}', [PhotoController::class, 'deleteUserPhotos']);
 
     // chat
     // Route::get('/chat', [MessageController::class, 'index']);

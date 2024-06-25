@@ -57,13 +57,23 @@ class PhotoController extends Controller
         ], 200);
     }
 
-    public function deleteUserPhotos(int $photo_id)
+    // public function deleteUserPhotos(int $photo_id)
+    // {
+    //     $photo = UserPhoto::find($photo_id);
+    //     if (Storage::disk('r2')->exists($photo->link)) {
+    //         Storage::disk('r2')->delete($photo->link);
+    //         return response()->json(['status' => 'success'], 200);
+    //     }
+    //     return response()->json(['status' => 'error'], 400);
+    // }
+
+    public function deleteUserPhotos(string $url)
     {
-        $photo = UserPhoto::find($photo_id);
-        if (Storage::disk('r2')->exists($photo->link)) {
-            Storage::disk('r2')->delete($photo->link);
-            return response()->json(['status' => 'success'], 200);
-        }
-        return response()->json(['status' => 'error'], 400);
+        $user = auth("sanctum")->user();
+        UserPhoto::where('user_account_id', $user->id)
+                ->where('link', $url)
+                ->delete();
+        
+        return response()->json(['status' => 'Delete photo success'], 200);
     }
 }

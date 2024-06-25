@@ -137,7 +137,9 @@ class AuthController extends Controller
             'location' => $user->location,
             "interests" => $interests,
             "relationship" => $user->relationshipType->name_relationship,
-            "photos" => $photos != null ? $photos : ["https://placebeard.it/500/500", "https://placebeard.it/500/500", "https://placebeard.it/500/500", "https://placebeard.it/500/500"]
+            "photos" => $photos != null ? $photos : ["https://placebeard.it/500/500", "https://placebeard.it/500/500", "https://placebeard.it/500/500", "https://placebeard.it/500/500"],
+            "max_distance" => $user->preference->max_distance,
+            "min_age" => $user->preference->min_age,
         ];
         return response()->json($data, 200);
     }

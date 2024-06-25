@@ -23,6 +23,7 @@ class UserPhoto extends Model
 
     public function imageUrl(){
         // return env('CLOUDFLARE_R2_URL').'/'. $this->link;
+        // return "https://firebasestorage.googleapis.com/v0/b/dating-app-59fdf.appspot.com/o/images%2F" . $this->link;
         return $this->link;
     }
 }
