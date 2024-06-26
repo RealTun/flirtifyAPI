@@ -26,58 +26,18 @@ class InterestTypeController extends Controller
             ->join('interest_type', 'interest_type_id', 'interest_type.id')
             ->where('user_account.id', $user->id)
             ->pluck('interest_type.name_interest_type');
-        if (count($data) < 1) {
-            return response()->json([
-                'status' => 'error',
-                'message' => "This user has not established a interest"
-            ], 400);
-        }
+        // if (count($data) < 1) {
+        //     return response()->json([
+        //         'status' => 'error',
+        //         'message' => "This user has not established a interest"
+        //     ], 400);
+        // }
         return response()->json([
             'status' => 'success',
             'user_name' => $user->fullname,
             'name_interest' => $data
         ], 200);
     }
-
-    // public function storeInterestUser(Request $request){
-    //     $rules = [
-    //         'interest_type_id' => 'required',
-    //     ];
-    //     $validator = Validator::make($request->all(), $rules);
-
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => "interest_type_id cannot be left blank!"
-    //         ], 400);
-    //     }
-
-    //     $user_id = $request->user('sanctum')->id;
-    //     $interest_type_id = $request->interest_type_id;
-    //     $isExisted = DB::table('interest_user')->where([
-    //         'user_account_id' => $user_id,
-    //         'interest_type_id' => $interest_type_id
-    //     ])->exists();
-    //     //
-    //     if ($isExisted) {
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => "This user has this interest!"
-    //         ], 400);
-    //     }
-
-    //     if(!InterestType::find($interest_type_id)){
-    //         return response()->json([
-    //             'status' => 'error',
-    //             'message' => 'Cannot find this interest!',
-    //         ], 400);
-    //     }
-    //     DB::table('interest_user')->insert([
-    //         'user_account_id' => $user_id,
-    //         'interest_type_id' => $interest_type_id
-    //     ]);
-    //     return redirect()->route('getInterestUser');
-    // }
 
     public function storeInterestUser(Request $request)
     {

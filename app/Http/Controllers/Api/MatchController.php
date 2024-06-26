@@ -34,6 +34,7 @@ class MatchController extends Controller
         } else {
             $users_id = User::whereRaw('gender = (SELECT looking_for FROM user_account WHERE id = ?)', [$id])
                 ->whereRaw('looking_for = (SELECT gender FROM user_account WHERE id = ?)', [$id])
+                ->where('id', '!=', $id)
                 ->whereNotIn('id', function ($query) use ($id) {
                     $query->select('user2_id')
                         ->from('user_connection')

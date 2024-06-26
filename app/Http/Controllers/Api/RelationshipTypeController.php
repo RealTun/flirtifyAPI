@@ -28,7 +28,7 @@ class RelationshipTypeController extends Controller
         }
 
         $user = $request->user('sanctum');
-        $user->relationship_type = $request->relationsip_type_id;
+        $user->relationship_type = $request->relationship_type_id;
         $user->save();
         return response()->json(['status'=> 'success'], 200);
     }
