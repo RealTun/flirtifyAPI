@@ -215,6 +215,7 @@ class AuthController extends Controller
     public function updatePassword(Request $request)
     {
         $rules = [
+            'email' => 'required',
             'pw' => 'required'
         ];
 
@@ -223,7 +224,7 @@ class AuthController extends Controller
             return response()->json(['message' => $validator->errors()], 400);
         }
 
-        $user = $request->user('sanctum');
+        $user = User::where('email', $request->email)->first();
         $user->pw = Hash::make($request->pw);
         $user->save();
         return response()->json(["status" => "update password successfully"], 200);

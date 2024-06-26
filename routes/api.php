@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 
 // authen
 Route::post('checkDuplicateEmail', [AuthController::class, 'checkDuplicateEmail']);
+Route::patch('changePassword', [AuthController::class, 'updatePassword']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
@@ -26,7 +27,6 @@ Route::middleware(['auth.api'])->group(function () {
     Route::patch('user/lookingfor', [AuthController::class, 'updateLookingFor']);
     Route::patch('user/gender', [AuthController::class, 'updateGender']);
     Route::patch('user/location', [AuthController::class, 'updateLocation']);
-    Route::patch('user/password', [AuthController::class, 'updatePassword']);
 
     // interest
     Route::get('interest-type/user', [InterestTypeController::class, 'getInterestByUser'])->name('getInterestUser');
