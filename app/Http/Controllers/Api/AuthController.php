@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\Preference;
 use App\Models\User;
-use App\Models\UserPhoto;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -114,7 +113,6 @@ class AuthController extends Controller
         $user = auth('sanctum')->user();
         $photos = [];
         $interests = [];
-        // $relationships = [];
 
         foreach ($user->photos as $item) {
             array_push($photos, $item->imageUrl());
@@ -124,15 +122,12 @@ class AuthController extends Controller
             array_push($interests, $item->interestType->name_interest_type);
         }
 
-        // foreach ($user->relationships as $item) {
-        //     array_push($relationships, $item->relationshipType->name_relationship);
-        // }
-
         $data = [
             "id" => $user->id,
             "fullname" => $user->fullname,
             'bio' => $user->bio,
             'age' => $user->age,
+            'gender' => $user->gender,
             'looking_for' => $user->looking_for,
             'location' => $user->location,
             "interests" => $interests,
@@ -140,6 +135,7 @@ class AuthController extends Controller
             "photos" => $photos != null ? $photos : ["https://placebeard.it/500/500", "https://placebeard.it/500/500", "https://placebeard.it/500/500", "https://placebeard.it/500/500"],
             "max_distance" => $user->preference->max_distance,
             "min_age" => $user->preference->min_age,
+            "max_age" => $user->preference->max_age
         ];
         return response()->json($data, 200);
     }
@@ -147,13 +143,9 @@ class AuthController extends Controller
     public function updateUser(Request $request)
     {
         $rules = [
-            // 'email' => 'required|email|unique:user_account,email|max:100',
-            'pw' => 'required|string|min:8|max:256',
             'fullname' => 'required|string|max:100',
             'bio' => 'nullable|string',
             'gender' => 'integer|in:0,1,2',
-            'relationship_type' => 'integer|in:1,2,3,4,5,6',
-            'location' => 'nullable|string|max:50',
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -181,10 +173,9 @@ class AuthController extends Controller
         }
 
         $user = $request->user('sanctum');
-        if($user->updateLookingFor($request->all())) {
-            return response()->json($user, 200);
-        }
-        return response()->json(["status" => "update user error"], 400);
+        $user->looking_for = $request->looking_for;
+        $user->save();
+        return response()->json(["status" => "update looking_for successfully"], 200);
     }
 
     public function updateGender(Request $request)
@@ -199,9 +190,42 @@ class AuthController extends Controller
         }
 
         $user = $request->user('sanctum');
-        if($user->updateLookingFor($request->all())) {
-            return response()->json($user, 200);
+        $user->gender = $request->gender;
+        $user->save();
+        return response()->json(["status" => "update gender successfully"], 200);
+    }
+
+    public function updateLocation(Request $request)
+    {
+        $rules = [
+            'location' => 'required|string'
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 400);
         }
-        return response()->json(["status" => "update gender error"], 400);
+
+        $user = $request->user('sanctum');
+        $user->location = $request->location;
+        $user->save();
+        return response()->json(["status" => "update location successfully"], 200);
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $rules = [
+            'pw' => 'required'
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()], 400);
+        }
+
+        $user = $request->user('sanctum');
+        $user->pw = Hash::make($request->pw);
+        $user->save();
+        return response()->json(["status" => "update password successfully"], 200);
     }
 }

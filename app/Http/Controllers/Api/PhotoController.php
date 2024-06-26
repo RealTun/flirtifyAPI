@@ -45,7 +45,7 @@ class PhotoController extends Controller
                 'message' => $validator->errors()->first()
             ], 400);
         }
-        
+
         UserPhoto::create([
             'user_account_id' => $request->user('sanctum')->id,
             'link' => $request->url,
@@ -57,23 +57,20 @@ class PhotoController extends Controller
         ], 200);
     }
 
-    // public function deleteUserPhotos(int $photo_id)
-    // {
-    //     $photo = UserPhoto::find($photo_id);
-    //     if (Storage::disk('r2')->exists($photo->link)) {
-    //         Storage::disk('r2')->delete($photo->link);
-    //         return response()->json(['status' => 'success'], 200);
-    //     }
-    //     return response()->json(['status' => 'error'], 400);
-    // }
-
-    public function deleteUserPhotos(string $url)
+    public function deleteUserPhotos(Request $request)
     {
         $user = auth("sanctum")->user();
-        UserPhoto::where('user_account_id', $user->id)
-                ->where('link', $url)
-                ->delete();
+        $url = $request->getContent();
         
-        return response()->json(['status' => 'Delete photo success'], 200);
+        $photo = UserPhoto::where('user_account_id', $user->id)
+            ->where('link', $url)
+            ->first();
+
+        if ($photo) {
+            $photo->delete();
+            return response()->json(['status' => 'Delete photo success'], 200);
+        } else {
+            return response()->json(['error' => 'Photo not found'], 404);
+        }
     }
 }

@@ -25,6 +25,8 @@ Route::middleware(['auth.api'])->group(function () {
     Route::patch('user', [AuthController::class, 'updateUser']);
     Route::patch('user/lookingfor', [AuthController::class, 'updateLookingFor']);
     Route::patch('user/gender', [AuthController::class, 'updateGender']);
+    Route::patch('user/location', [AuthController::class, 'updateLocation']);
+    Route::patch('user/password', [AuthController::class, 'updatePassword']);
 
     // interest
     Route::get('interest-type/user', [InterestTypeController::class, 'getInterestByUser'])->name('getInterestUser');
@@ -44,7 +46,7 @@ Route::middleware(['auth.api'])->group(function () {
     // photo
     Route::get('user-photos', [PhotoController::class, 'getUserPhotos']);
     Route::post('user-photos/upload', [PhotoController::class, 'storeUserPhotos']);
-    Route::delete('user/photos/delete/{photo_url}', [PhotoController::class, 'deleteUserPhotos']);
+    Route::post('user/photos/delete', [PhotoController::class, 'deleteUserPhotos']);
 
     // chat
     // Route::get('/chat', [MessageController::class, 'index']);

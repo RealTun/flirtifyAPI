@@ -17,26 +17,42 @@ class MatchController extends Controller
     public function getUserToConnect()
     {
         $id = auth('sanctum')->user()->id;
-        $users_id = User::whereRaw('gender = (SELECT looking_for FROM user_account WHERE id = ?)', [$id])
-            ->whereRaw('looking_for = (SELECT gender FROM user_account WHERE id = ?)', [$id])
-            ->whereNotIn('id', function ($query) use ($id) {
+        $user = auth("sanctum")->user();
+        $users_id = null;
+        if ($user->looking_for == 2) {
+            $users_id = User::whereNotIn('id', function ($query) use ($id) {
                 $query->select('user2_id')
                     ->from('user_connection')
                     ->where('user1_id', '=', $id);
-            })
-            ->whereNotIn('id', function ($query) use ($id) {
-                $query->select('user_account_id_blocked')
-                    ->from('block_user')
-                    ->where('user_account_id', '=', $id);
-            })
-            ->pluck('id');
+                })
+                ->whereNotIn('id', function ($query) use ($id) {
+                    $query->select('user_account_id_blocked')
+                        ->from('block_user')
+                        ->where('user_account_id', '=', $id);
+                })
+                ->pluck('id');
+        } else {
+            $users_id = User::whereRaw('gender = (SELECT looking_for FROM user_account WHERE id = ?)', [$id])
+                ->whereRaw('looking_for = (SELECT gender FROM user_account WHERE id = ?)', [$id])
+                ->whereNotIn('id', function ($query) use ($id) {
+                    $query->select('user2_id')
+                        ->from('user_connection')
+                        ->where('user1_id', '=', $id);
+                })
+                ->whereNotIn('id', function ($query) use ($id) {
+                    $query->select('user_account_id_blocked')
+                        ->from('block_user')
+                        ->where('user_account_id', '=', $id);
+                })
+                ->pluck('id');
+        }
+
 
         $data = [];
         foreach ($users_id as $user_id) {
             $user = User::find($user_id);
             $photos = [];
             $interests = [];
-            // $relationships = [];
 
             foreach ($user->photos as $item) {
                 array_push($photos, $item->imageUrl());
@@ -45,10 +61,6 @@ class MatchController extends Controller
             foreach ($user->interests as $item) {
                 array_push($interests, $item->interestType->name_interest_type);
             }
-
-            // foreach ($user->relationships as $item) {
-            //     array_push($relationships, $item->relationshipType->name_relationship);
-            // }
 
             array_push($data, [
                 "id" => $user->id,
@@ -84,7 +96,7 @@ class MatchController extends Controller
             $message = Message::where(function ($query) use ($id, $matcher_id) {
                 $query->where('sender_id', $id)
                     ->where('receiver_id', $matcher_id);
-                })
+            })
                 ->orWhere(function ($query) use ($id, $matcher_id) {
                     $query->where('receiver_id', $id)
                         ->where('sender_id', $matcher_id);
@@ -149,14 +161,14 @@ class MatchController extends Controller
             'action' => $action
         ]);
         // check 2 user is matched
-        $isMatched = UserConnection::where(function($query) use ($user1_id, $user2_id) {
+        $isMatched = UserConnection::where(function ($query) use ($user1_id, $user2_id) {
             $query->where('user1_id', $user2_id)
-                  ->where('user2_id', $user1_id)
-                  ->where('action', 1);
-        })->orWhere(function($query) use ($user1_id, $user2_id) {
+                ->where('user2_id', $user1_id)
+                ->where('action', 1);
+        })->orWhere(function ($query) use ($user1_id, $user2_id) {
             $query->where('user1_id', $user1_id)
-                  ->where('user2_id', $user2_id)
-                  ->where('action', 1);
+                ->where('user2_id', $user2_id)
+                ->where('action', 1);
         })->count() === 2;
         if ($isMatched) {
             $currentTime = date('Y-m-d H:i:s');
